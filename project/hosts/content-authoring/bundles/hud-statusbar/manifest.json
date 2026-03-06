@@ -1,0 +1,8 @@
+{
+  "bundleId": "hud-statusbar",
+  "version": "0.1.0",
+  "displayName": "Status Bar",
+  "entryScene": "scenes/registrar.tscn",
+  "scenes": ["scenes/registrar.tscn", "scenes/statusbar.tscn"],
+  "metadata": {}
+}
