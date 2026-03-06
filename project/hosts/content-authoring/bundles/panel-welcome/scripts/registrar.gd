@@ -19,7 +19,7 @@ func _register() -> void:
 
 
 func _on_root_child(node: Node) -> void:
-	if node.name == "HudRoot":
+	if node.name == "HudRoot" or node.name == "Main":
 		get_tree().root.child_entered_tree.disconnect(_on_root_child)
 		var dock := _find_dock_container()
 		if dock:
@@ -36,4 +36,7 @@ func _find_dock_container() -> Node:
 	for child in get_tree().root.get_children():
 		if child.name == "HudRoot":
 			return child.get_node_or_null("VBox/DockContainer")
+		var hud := child.get_node_or_null("HudRoot")
+		if hud:
+			return hud.get_node_or_null("VBox/DockContainer")
 	return null

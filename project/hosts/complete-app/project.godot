@@ -18,6 +18,8 @@ run/main_scene="res://scenes/main.tscn"
 [autoload]
 
 AppHost="*res://AppHost.cs"
+SelectionState="*res://scripts/selection_state.gd"
+EditorDocument="*res://scripts/editor_document.gd"
 
 [display]
 
