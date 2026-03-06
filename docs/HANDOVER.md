@@ -1,35 +1,124 @@
 # Busy Office — Handover Document
 
-## What Was Built (Session 1)
+## What Was Built
+
+### Session 1 — Bundle System + Editor HUD
 
 Hot-reloadable bundle system with a 6-zone dock container HUD, adapted from fantasim-app-godot.
 
-### Architecture
+- C# host: AppHost (autoload) → Bootstrap (ServiceArchi + PluginArchi DI) → BundleHost
+- 7 GDScript bundles: panel-welcome, hud-menubar, hud-statusbar, panel-scene-tree, panel-inspector, panel-timeline, panel-viewport
+- GDScript autoloads: SelectionState, EditorDocument (mock scene tree)
+- Pre-commit hooks: trailing-whitespace, end-of-file-fixer, check-yaml/json, ruff
+
+### Session 2 — Project Pivot + RFCs + CI
+
+Pivoted from editor UI to **agent swarm visualizer + office tycoon game**.
+
+**Research completed:**
+- **unify-ecs** — source-gen ECS meta-framework, Arch backend most mature (net8.0 compatible)
+- **tentacle-punch** — Python A2A agent swarm over HTTP JSON-RPC, LangGraph orchestrator
+- **pixel-agents** — VS Code extension, visual reference for pixel-art office (16x24 sprites, tile grid, FSM)
+
+**RFCs written** (`docs/rfcs/`):
+
+| RFC | Title | Key Decisions |
+|-----|-------|---------------|
+| 001 | Game Architecture | Two modes (connected + tycoon), ECS + Godot, editor HUD retained |
+| 002 | ECS Integration | unify-ecs + Arch, component structs, 6 systems, file layout |
+| 003 | Office Simulation | 24x16 tile grid, 16px tiles, BFS pathfinding, agent FSM (Idle/Walking/Sitting/Typing/Reading) |
+| 004 | C#-GDScript Bridge | GameBridge autoload, Dictionary arrays + signals, snapshot pattern |
+| 005 | A2A WebSocket | JSON-RPC over WebSocket, event types, reconnection, thread safety |
+| 006 | Tycoon Mode | Task types, generation, economy (credits), progression curve |
+
+**CI/CD set up:**
+- `gh aw init` — GitHub Agentic Workflows
+- `pr-review-resolver` — `/resolve-reviews` command on PRs (Copilot engine)
+- `auto-merge-copilot` — auto-squash Copilot sub-PRs
+- `COPILOT_GITHUB_TOKEN` secret configured
+
+---
+
+## Current State
+
+- All 7 bundles built and functional (editor-style, will be rewritten for game)
+- C# builds clean, exported app runs
+- RFCs approved for implementation
+- GitHub remote: `GiantCroissant-Lunar/busy-office`
+- No ECS packages in local NuGet feed yet
+
+---
+
+## Next Session: Phase 0 — Build UnifyEcs Packages
+
+### Goal
+
+Get unify-ecs NuGet packages into the local feed so `complete-app.csproj` can reference them.
+
+### Steps
+
+```bash
+cd C:\lunar-horse\plate-projects\unify-ecs
+
+# 1. Restore tools
+dotnet tool restore
+
+# 2. Get version
+export GITVERSION_MAJORMINORPATCH=$(bash tools/gitversion.sh | python -c "import sys,json;print(json.load(sys.stdin)['MajorMinorPatch'])")
+
+# 3. Build + pack
+dotnet tool run unify-build -- PackProjects
+
+# 4. Sync to local feed
+cp build/_artifacts/*/nuget/*.nupkg C:\lunar-horse\packages\nuget\flat/
+```
+
+### Verify
+
+```bash
+ls C:\lunar-horse\packages\nuget\flat/UnifyEcs*
+# Should see: UnifyEcs.Core, UnifyEcs.Attributes, UnifyEcs.Generators, UnifyEcs.Runtime.Arch
+```
+
+### Then Phase 1
+
+After packages are in the feed, proceed with Phase 1 (RFC-002):
+
+1. Add `UnifyEcs.*` NuGet refs to `complete-app.csproj`
+2. Create `Ecs/Components.cs` — component structs
+3. Create `Ecs/GameWorld.cs` — world owner
+4. Create `GameBridge.cs` — C# autoload (RFC-004)
+5. Wire into `AppHost._Process()`
+6. Rewrite panel-viewport → tile grid renderer
+7. Rewrite panel-scene-tree → agent list
+8. Rewrite panel-inspector → agent properties
+9. Update hud-statusbar → game stats
+
+---
+
+## Architecture Reference
 
 ```
 complete-app (Godot host)               content-authoring (GDScript bundles)
 ├── AppHost.cs (autoload)               └── bundles/
-├── Bootstrap.cs (DI)                       └── panel-welcome/
-├── scenes/main.tscn                            ├── manifest.json
-│   └── instances hud_root.tscn                 ├── scripts/registrar.gd
-├── scenes/hud_root.tscn                        ├── scripts/panel.gd
-├── scripts/dock_container.gd                   ├── scenes/registrar.tscn
-└── C# libraries:                               └── scenes/panel.tscn
+├── Bootstrap.cs (DI)                       ├── panel-welcome/
+├── GameBridge.cs (autoload, NEW)           ├── hud-menubar/
+├── Ecs/ (NEW)                              ├── hud-statusbar/
+│   ├── Components.cs                       ├── panel-scene-tree/
+│   ├── GameWorld.cs                        ├── panel-inspector/
+│   ├── TileMap.cs                          ├── panel-timeline/
+│   └── Systems/                            └── panel-viewport/
+├── Net/ (NEW)
+│   └── A2AWebSocketClient.cs
+├── scenes/main.tscn
+│   └── instances hud_root.tscn
+├── scripts/dock_container.gd
+└── C# libraries:
     ├── BusyOffice.Bundles.Contracts
     └── BusyOffice.Bundles.Core
 ```
 
-### Runtime Flow
-
-1. Godot starts → `AppHost._Ready()` (autoload)
-2. AppHost creates Bootstrap (ServiceArchi + PluginArchi DI)
-3. AppHost creates BundleHost (VFS + SceneHost + DllExtractor)
-4. BundleHost scans `bundles/` dir for `.pck` files
-5. Each PCK: load VFS → read `manifest.json` → instantiate `entryScene`
-6. Entry scene is a `registrar.gd` that finds DockContainer and calls `register_panel()`
-7. Panel appears in a TabContainer zone
-
-### Dock Zones
+### Dock Zones (unchanged)
 
 ```
 ┌──────────┬───────────────┬──────────┐
@@ -41,120 +130,26 @@ complete-app (Godot host)               content-authoring (GDScript bundles)
 ├──────────┴───────────────┴──────────┤
 │            Bottom (5)               │
 └─────────────────────────────────────┘
+
+Zone 0: panel-scene-tree (agent list)
+Zone 1: panel-viewport (office tile grid)
+Zone 2: panel-inspector (agent properties)
+Zone 5: panel-timeline (activity log)
 ```
 
-### Key Files
+### Key Dependencies
 
-| File | Purpose |
-|------|---------|
-| `project/hosts/complete-app/AppHost.cs` | Node autoload — Bootstrap + BundleHost init, auto-loads PCKs |
-| `project/hosts/complete-app/Bootstrap.cs` | DI container (ServiceArchi + PluginArchi + SharedAssemblyPolicy) |
-| `project/hosts/complete-app/scripts/dock_container.gd` | 6-zone panel manager (register/unregister/move) |
-| `project/hosts/complete-app/scenes/hud_root.tscn` | VSplitContainer + HSplitContainer + TabContainers layout |
-| `project/hosts/complete-app/scenes/main.tscn` | Root scene, instances hud_root |
-| `project/plugins/BusyOffice.Bundles.Core/BundleHost.cs` | Load/unload/reload PCK orchestrator |
-| `project/plugins/BusyOffice.Bundles.Core/BundleVfs.cs` | PCK loading + manifest reading |
-| `project/hosts/content-authoring/bundles/panel-welcome/` | Sample bundle (registrar + panel with timestamp) |
-| `design/dock-container.json` | boom-hud DSL describing the dock layout |
+| Dependency | Location | Status |
+|------------|----------|--------|
+| unify-ecs (Arch) | `C:\lunar-horse\plate-projects\unify-ecs` | Needs build + feed sync |
+| tentacle-punch | `github.com/GiantCroissant-Lunar/tentacle-punch` | Phase 4 (WebSocket endpoint needed) |
+| pixel-agents | `github.com/pablodelucca/pixel-agents` | Visual reference only |
 
 ### Build Commands
 
 ```bash
-# Build & export app
-task build:app
-
-# Build panel-welcome bundle PCK
-task build:bundle:panel-welcome
-
-# Run exported app
-task run:complete-app
-
-# Open in Godot editor
-task run:complete-app:editor
+task build:app                # Export complete-app.exe
+task build:bundles --force    # Export all bundle PCKs
+task run:complete-app         # Run exported app
+task run:complete-app:editor  # Open in Godot editor
 ```
-
-### Current State
-
-- C# builds clean (0 errors, 0 warnings)
-- Exported app runs, Bootstrap + BundleHost initialize successfully
-- panel-welcome PCK not yet built (bundle loads at runtime, not at build time yet)
-- pre-commit hooks active: trailing-whitespace, end-of-file-fixer, check-yaml/json, ruff lint+format
-
----
-
-## Next Session Plan: Editor-Style HUD
-
-Transform the dock container into a full editor-like interface with these bundles:
-
-### 1. Menu Bar (bundle: `hud-menubar`)
-
-- Top of window, outside dock container (zone -1 or dedicated slot)
-- File, Edit, View, Help menus
-- GDScript `MenuBar` / `PopupMenu` nodes
-- Emits signals for actions (new, open, save, undo, redo, etc.)
-
-### 2. Status Bar (bundle: `hud-statusbar`)
-
-- Bottom of window, outside dock container (dedicated slot below zone 5)
-- Shows: current time, FPS, bundle count, selected item info
-- Thin horizontal bar with labels
-
-### 3. Timeline / Animation Player (bundle: `panel-timeline`)
-
-- Docks in **Bottom zone (5)**
-- AnimationPlayer-like UI: playhead, keyframes, tracks
-- Transport controls (play/pause/stop/step)
-- Time ruler with zoom
-- Track list on left, keyframe area on right
-- This is the core "animation tree" editor
-
-### 4. Inspector (bundle: `panel-inspector`)
-
-- Docks in **Right zone (2)**
-- Shows properties of selected item
-- Dynamic property list (labels + editors)
-- Reacts to selection changes
-- Supports different property types (string, number, bool, color, enum)
-
-### 5. Scene Tree / Hierarchy (bundle: `panel-scene-tree`)
-
-- Docks in **Left zone (0)**
-- Tree widget showing document hierarchy
-- Drag-and-drop reordering
-- Selection syncs with Inspector and Timeline
-- Context menu (add, delete, rename, duplicate)
-
-### 6. Viewport / Canvas (bundle: `panel-viewport`)
-
-- Docks in **Center zone (1)** (replaces panel-welcome)
-- 2D canvas for visual editing
-- Shows the scene being edited
-- Selection handles, gizmos
-
-### Implementation Order
-
-```
-1. hud-menubar + hud-statusbar  (structural — modify main.tscn to add slots)
-2. panel-scene-tree              (data model + selection state)
-3. panel-inspector               (reacts to selection)
-4. panel-timeline                (animation system — most complex)
-5. panel-viewport                (visual canvas — depends on data model)
-```
-
-### Architectural Decisions Needed
-
-- **Selection State**: Need a shared selection singleton (C# or GDScript autoload?) that all panels observe. fantasim-app-godot uses a `SelectionState` autoload — follow same pattern.
-- **Document Model**: What data structure represents the "document" being edited? Need to define this before building Scene Tree + Inspector.
-- **Menu Bar / Status Bar placement**: Either add dedicated VBox slots in main.tscn (above/below DockContainer) or make them bundles that register into non-dock zones.
-- **Timeline data model**: What are "tracks" and "keyframes"? Need to decide if this is a generic animation system or domain-specific.
-
-### Reference Files (fantasim-app-godot)
-
-| What | Path |
-|------|------|
-| Inspector panel | `content-authoring/bundles/panel-inspector/scripts/panel.gd` |
-| Scene tree panel | `content-authoring/bundles/panel-scene-tree/scripts/panel.gd` |
-| Viewport panel | `content-authoring/bundles/panel-viewport/scripts/panel.gd` |
-| Registrar pattern | `content-authoring/bundles/panel-viewport/scripts/registrar.gd` |
-| Dock container | `content-authoring/bundles/hud-control/scripts/dock_container.gd` |
-| AppHost (autoload) | `complete-app/AppHost.cs` |
