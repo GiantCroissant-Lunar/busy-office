@@ -55,10 +55,58 @@ tasks:
       - mkdir -p "{{.APP_DIR}}/bundles"
       - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "panel-welcome PCK" "{{.APP_DIR}}/bundles/panel-welcome.pck"'
 
+  "build:bundle:hud-menubar":
+    desc: Build hud-menubar bundle PCK
+    deps: ["ensure:dirs"]
+    cmds:
+      - mkdir -p "{{.APP_DIR}}/bundles"
+      - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "hud-menubar PCK" "{{.APP_DIR}}/bundles/hud-menubar.pck"'
+
+  "build:bundle:hud-statusbar":
+    desc: Build hud-statusbar bundle PCK
+    deps: ["ensure:dirs"]
+    cmds:
+      - mkdir -p "{{.APP_DIR}}/bundles"
+      - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "hud-statusbar PCK" "{{.APP_DIR}}/bundles/hud-statusbar.pck"'
+
+  "build:bundle:panel-scene-tree":
+    desc: Build panel-scene-tree bundle PCK
+    deps: ["ensure:dirs"]
+    cmds:
+      - mkdir -p "{{.APP_DIR}}/bundles"
+      - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "panel-scene-tree PCK" "{{.APP_DIR}}/bundles/panel-scene-tree.pck"'
+
+  "build:bundle:panel-inspector":
+    desc: Build panel-inspector bundle PCK
+    deps: ["ensure:dirs"]
+    cmds:
+      - mkdir -p "{{.APP_DIR}}/bundles"
+      - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "panel-inspector PCK" "{{.APP_DIR}}/bundles/panel-inspector.pck"'
+
+  "build:bundle:panel-timeline":
+    desc: Build panel-timeline bundle PCK
+    deps: ["ensure:dirs"]
+    cmds:
+      - mkdir -p "{{.APP_DIR}}/bundles"
+      - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "panel-timeline PCK" "{{.APP_DIR}}/bundles/panel-timeline.pck"'
+
+  "build:bundle:panel-viewport":
+    desc: Build panel-viewport bundle PCK
+    deps: ["ensure:dirs"]
+    cmds:
+      - mkdir -p "{{.APP_DIR}}/bundles"
+      - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "panel-viewport PCK" "{{.APP_DIR}}/bundles/panel-viewport.pck"'
+
   "build:bundles":
     desc: Build all bundles
     deps:
       - "build:bundle:panel-welcome"
+      - "build:bundle:hud-menubar"
+      - "build:bundle:hud-statusbar"
+      - "build:bundle:panel-scene-tree"
+      - "build:bundle:panel-inspector"
+      - "build:bundle:panel-timeline"
+      - "build:bundle:panel-viewport"
 
   # ============================================================================
   # Run Tasks
