@@ -1,0 +1,25 @@
+<Project Sdk="Godot.NET.Sdk/4.6.1">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <NoWarn>NU1605</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="GiantCroissant.Plate.ServiceArchi.Contracts" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Plate.ServiceArchi.Core" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Config.Contracts" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Config.Core" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Config.Json" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Logging.Contracts" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Logging.Core" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Logging.Console" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Hosting.Contracts" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Crosscut.Hosting.Core" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Plate.PluginArchi.Extensibility.Abstractions" Version="0.1.*" />
+    <PackageReference Include="GiantCroissant.Plate.PluginArchi.Extensibility.Hosting" Version="0.1.*" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\contracts\BusyOffice.Bundles.Contracts\BusyOffice.Bundles.Contracts.csproj" />
+    <ProjectReference Include="..\..\plugins\BusyOffice.Bundles.Core\BusyOffice.Bundles.Core.csproj" />
+  </ItemGroup>
+</Project>

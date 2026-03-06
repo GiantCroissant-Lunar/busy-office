@@ -1,0 +1,65 @@
+[gd_scene load_steps=2 format=3 uid="uid://hud_root_001"]
+
+[ext_resource type="Script" path="res://scripts/dock_container.gd" id="1_dock"]
+
+[node name="HudRoot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DockContainer" type="VSplitContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("1_dock")
+
+[node name="MainArea" type="HSplitContainer" parent="VBox/DockContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 250
+
+[node name="LeftColumn" type="VSplitContainer" parent="VBox/DockContainer/MainArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="LeftTop" type="TabContainer" parent="VBox/DockContainer/MainArea/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftBottom" type="TabContainer" parent="VBox/DockContainer/MainArea/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Center" type="TabContainer" parent="VBox/DockContainer/MainArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.0
+
+[node name="RightColumn" type="VSplitContainer" parent="VBox/DockContainer/MainArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="RightTop" type="TabContainer" parent="VBox/DockContainer/MainArea/RightColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RightBottom" type="TabContainer" parent="VBox/DockContainer/MainArea/RightColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Bottom" type="TabContainer" parent="VBox/DockContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.3

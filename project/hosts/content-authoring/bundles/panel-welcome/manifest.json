@@ -1,0 +1,11 @@
+{
+  "bundleId": "panel-welcome",
+  "version": "0.1.0",
+  "displayName": "Welcome Panel",
+  "entryScene": "scenes/registrar.tscn",
+  "scenes": [
+    "scenes/registrar.tscn",
+    "scenes/panel.tscn"
+  ],
+  "metadata": {}
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "boom-hud-dsl/v1",
+  "description": "6-zone dock container layout for busy-office HUD",
+  "root": {
+    "type": "container",
+    "direction": "vertical",
+    "fill": true,
+    "children": [
+      {
+        "id": "MainArea",
+        "type": "splitview",
+        "direction": "horizontal",
+        "stretch_ratio": 3,
+        "children": [
+          {
+            "id": "LeftColumn",
+            "type": "splitview",
+            "direction": "vertical",
+            "children": [
+              { "id": "LeftTop", "type": "tabview", "zone": 0 },
+              { "id": "LeftBottom", "type": "tabview", "zone": 3 }
+            ]
+          },
+          { "id": "Center", "type": "tabview", "zone": 1 },
+          {
+            "id": "RightColumn",
+            "type": "splitview",
+            "direction": "vertical",
+            "children": [
+              { "id": "RightTop", "type": "tabview", "zone": 2 },
+              { "id": "RightBottom", "type": "tabview", "zone": 4 }
+            ]
+          }
+        ]
+      },
+      { "id": "Bottom", "type": "tabview", "zone": 5 }
+    ]
+  }
+}

@@ -2,16 +2,102 @@ version: "3"
 
 vars:
   UNIFY_BUILD_TOOL: dotnet tool run unify-build --
+  GODOT: 'C:\lunar-horse\tools\Godot_v4.6.1-stable_mono_win64\Godot_v4.6.1-stable_mono_win64.exe'
+  CONTENT_PROJECT: project/hosts/content-authoring
+  APP_PROJECT: project/hosts/complete-app
+  ARTIFACTS_DIR: '{{.ROOT_DIR}}/build/_artifacts'
+  APP_DIR: '{{.ARTIFACTS_DIR}}/complete-app'
+  APP_EXE: '{{.APP_DIR}}/complete-app.exe'
+
+env:
+  GODOT4_BIN: "{{.GODOT}}"
 
 tasks:
-  build:godot:
+  # ============================================================================
+  # Build Tasks
+  # ============================================================================
+
+  "build:godot":
     desc: Build and export the Godot application
     cmds:
       - cmd: dotnet tool restore
       - cmd: "{{.UNIFY_BUILD_TOOL}} BuildGodot --configuration Release"
 
-  build:godot:desktop:
+  "build:godot:desktop":
     desc: Build Godot for desktop platforms only
     cmds:
       - cmd: dotnet tool restore
       - cmd: "{{.UNIFY_BUILD_TOOL}} BuildGodotDesktop --configuration Release"
+
+  "build:app":
+    desc: Export complete-app executable
+    deps: ["ensure:dirs"]
+    cmds:
+      - '"{{.GODOT}}" --headless --path "{{.APP_PROJECT}}" --export-release "Windows Desktop" "{{.APP_EXE}}"'
+    sources:
+      - "{{.APP_PROJECT}}/**/*.gd"
+      - "{{.APP_PROJECT}}/**/*.cs"
+      - "{{.APP_PROJECT}}/**/*.csproj"
+      - "{{.APP_PROJECT}}/**/*.tscn"
+      - "{{.APP_PROJECT}}/**/*.cfg"
+      - "{{.APP_PROJECT}}/project.godot"
+    generates:
+      - "{{.APP_EXE}}"
+
+  # ============================================================================
+  # Bundle Build Tasks
+  # ============================================================================
+
+  "build:bundle:panel-welcome":
+    desc: Build panel-welcome bundle PCK
+    deps: ["ensure:dirs"]
+    cmds:
+      - mkdir -p "{{.APP_DIR}}/bundles"
+      - '"{{.GODOT}}" --headless --path "{{.CONTENT_PROJECT}}" --export-pack "panel-welcome PCK" "{{.APP_DIR}}/bundles/panel-welcome.pck"'
+
+  "build:bundles":
+    desc: Build all bundles
+    deps:
+      - "build:bundle:panel-welcome"
+
+  # ============================================================================
+  # Run Tasks
+  # ============================================================================
+
+  "run:complete-app":
+    desc: Run the exported complete-app
+    cmds:
+      - '"{{.APP_EXE}}"'
+
+  "run:complete-app:editor":
+    desc: Open complete-app project in Godot editor
+    cmds:
+      - '"{{.GODOT}}" --path "{{.APP_PROJECT}}" --editor'
+
+  "run:content-authoring":
+    desc: Open content-authoring project in Godot editor
+    cmds:
+      - '"{{.GODOT}}" --path "{{.CONTENT_PROJECT}}" --editor'
+
+  # ============================================================================
+  # HUD Generation
+  # ============================================================================
+
+  "generate:hud":
+    desc: Generate HUD .tscn from boom-hud DSL
+    cmds:
+      - >-
+        dotnet run --project C:/lunar-horse/plate-projects/boom-hud/dotnet/src/BoomHud.Cli/BoomHud.Cli.csproj
+        -- generate design/dock-container.json
+        --target godot --output project/hosts/complete-app/scenes
+        --namespace BusyOffice --tscn --tscn-no-script
+
+  # ============================================================================
+  # Utility Tasks
+  # ============================================================================
+
+  "ensure:dirs":
+    desc: Ensure artifacts directories exist
+    internal: true
+    cmds:
+      - mkdir -p "{{.APP_DIR}}"
