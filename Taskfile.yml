@@ -1,0 +1,17 @@
+version: "3"
+
+vars:
+  UNIFY_BUILD_TOOL: dotnet tool run unify-build --
+
+tasks:
+  build:godot:
+    desc: Build and export the Godot application
+    cmds:
+      - cmd: dotnet tool restore
+      - cmd: "{{.UNIFY_BUILD_TOOL}} BuildGodot --configuration Release"
+
+  build:godot:desktop:
+    desc: Build Godot for desktop platforms only
+    cmds:
+      - cmd: dotnet tool restore
+      - cmd: "{{.UNIFY_BUILD_TOOL}} BuildGodotDesktop --configuration Release"

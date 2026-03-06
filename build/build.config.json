@@ -1,0 +1,18 @@
+{
+    "$schema": "./build.config.schema.json",
+    "versionEnv": "GITVERSION_MAJORMINORPATCH",
+    "projectGroups": {},
+    "godotBuild": {
+        "projectRoot": "project/hosts/complete-app",
+        "executablePathEnv": "GODOT",
+        "assemblyName": "complete-app",
+        "platforms": [
+            {
+                "rid": "win-x64",
+                "presetName": "Windows Desktop",
+                "binaryName": "complete-app.exe",
+                "dataDirName": "{AssemblyName}_Data"
+            }
+        ]
+    }
+}
