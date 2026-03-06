@@ -1,0 +1,15 @@
+# .NET build output
+bin/
+obj/
+
+# Godot editor cache
+.godot/
+
+# NUKE build temp
+.nuke/temp/
+
+# Godot UID cache files
+*.uid
+
+# Build artifacts
+build/_artifacts/
